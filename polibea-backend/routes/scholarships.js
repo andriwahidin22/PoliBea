@@ -3,9 +3,8 @@ const router = express.Router();
 const scholarshipController = require('../controllers/scholarshipController');
 const multer = require('multer');
 const path = require('path');
-const { verifyToken } = require('../middleware/authMiddleware');
 
-// 🔹 Konfigurasi Multer untuk Upload Gambar
+// 🔹 Konfigurasi Multer untuk menyimpan file di folder "uploads"
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
@@ -18,15 +17,15 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ✅ Ambil semua beasiswa
-router.get('/', verifyToken, scholarshipController.getAllScholarships);
+router.get('/', scholarshipController.getAllScholarships);
 
-// ✅ Tambah beasiswa
-router.post('/', verifyToken, upload.single('photo'), scholarshipController.createScholarship);
+// ✅ Tambah beasiswa (dengan upload gambar)
+router.post('/', upload.single('photo'), scholarshipController.createScholarship);
 
 // ✅ Update beasiswa
-router.put('/:id', verifyToken, upload.single('photo'), scholarshipController.updateScholarship);
+router.put('/:id', upload.single('photo'), scholarshipController.updateScholarship);
 
 // ✅ Hapus beasiswa
-router.delete('/:id', verifyToken, scholarshipController.deleteScholarship);
+router.delete('/:id', scholarshipController.deleteScholarship);
 
 module.exports = router;

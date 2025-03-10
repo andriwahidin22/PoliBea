@@ -2,9 +2,14 @@ const db = require('../config/db');
 
 const Scholarship = {
     getAll: async () => {
-        const sql = 'SELECT id, name, CONCAT("/uploads/", photo) AS photo, timeline, description, status FROM scholarships';
+        const sql = 'SELECT id, name, photo, timeline, description, status FROM scholarships';
         const [rows] = await db.promise().query(sql);
-        return rows;
+
+        // Pastikan path photo berupa string, bukan Buffer
+        return rows.map(row => ({
+            ...row,
+            photo: row.photo ? row.photo.toString() : null
+        }));
     },
 
     create: async (name, photo, timeline, description, status) => {

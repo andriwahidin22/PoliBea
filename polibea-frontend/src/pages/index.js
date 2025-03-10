@@ -366,84 +366,74 @@ export default function Home() {
 
           {/* Features Details Section */}
           <section id="features-details" className="features-details section">
-      <div className="container">
-        {scholarships.map((scholarship, index) => (
-          <div
-            className="row gy-4 justify-content-between features-item"
-            key={scholarship.id}
-          >
-            {index % 2 === 0 ? (
-              <>
-                {/* Gambar di sebelah kiri */}
-                <div className="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-                  <img
-                    src={scholarship.photo}
-                    className="img-fluid"
-                    alt={scholarship.name}
-                  />
-                </div>
-                {/* Detail di sebelah kanan */}
-                <div
-                  className="col-lg-5 d-flex align-items-center"
-                  data-aos="fade-up"
-                  data-aos-delay="200"
-                >
-                  <div className="content">
-                    <h3>{scholarship.name}</h3>
-                    <p>{scholarship.description}</p>
-                    <a
-                      href={`/scholarship/${scholarship.id}`}
-                      className="btn more-btn"
-                    >
-                      Lihat Detail Persyaratan
-                    </a>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                {/* Detail di sebelah kiri */}
-                <div
-                  className="col-lg-5 d-flex align-items-center order-2 order-lg-1"
-                  data-aos="fade-up"
-                  data-aos-delay="100"
-                >
-                  <div className="content">
-                    <h3>{scholarship.name}</h3>
-                    <p>{scholarship.description}</p>
-                    <ul>
-                      {scholarship.requirements?.map((req, idx) => (
-                        <li key={idx}>
-                          <i className="bi bi-check-circle flex-shrink-0"></i> {req}
-                        </li>
-                      ))}
-                    </ul>
-                    <a
-                      href={`/scholarship/${scholarship.id}`}
-                      className="btn more-btn"
-                    >
-                      Lihat Detail Persyaratan
-                    </a>
-                  </div>
-                </div>
-                {/* Gambar di sebelah kanan */}
-                <div
-                  className="col-lg-6 order-1 order-lg-2"
-                  data-aos="fade-up"
-                  data-aos-delay="200"
-                >
-                  <img
-                    src={scholarship.photo}
-                    className="img-fluid"
-                    alt={scholarship.name}
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        ))}
+  <div className="container">
+    {scholarships.map((scholarship, index) => (
+      <div 
+        className="row gy-4 justify-content-between features-item align-items-center p-4 shadow-sm rounded bg-light"
+        key={scholarship.id}
+        data-aos="fade-up"
+        data-aos-delay="100"
+      >
+        {/* Jika index genap (0, 2, 4...), gambar di kiri, teks di kanan */}
+        {index % 2 === 0 ? (
+          <>
+            {/* Gambar di kiri */}
+            <div className="col-lg-6 text-center">
+              <img
+                src={scholarship.photo ? scholarship.photo : "/assets/img/default.jpg"}
+                className="img-fluid rounded"
+                alt={scholarship.name}
+                style={{ maxHeight: "400px", objectFit: "cover", width: "100%" }}
+              />
+            </div>
+            {/* Teks di kanan */}
+            <div className="col-lg-5">
+              <div className="content">
+                <h3 className="fw-bold text-primary">{scholarship.name}</h3>
+                <p>{scholarship.description}</p>
+                <a href={`/scholarship/${scholarship.id}`} className="btn btn-primary btn-lg mt-3">
+                  Lihat Detail Persyaratan
+                </a>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Teks di kiri */}
+            <div className="col-lg-5 order-2 order-lg-1">
+              <div className="content">
+                <h3 className="fw-bold text-primary">{scholarship.name}</h3>
+                <p>{scholarship.description}</p>
+                {scholarship.requirements?.length > 0 && (
+                  <ul className="list-unstyled">
+                    {scholarship.requirements.map((req, idx) => (
+                      <li key={idx}>
+                        <i className="bi bi-check-circle text-success"></i> {req}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <a href={`/scholarship/${scholarship.id}`} className="btn btn-primary btn-lg mt-3">
+                  Lihat Detail Persyaratan
+                </a>
+              </div>
+            </div>
+            {/* Gambar di kanan */}
+            <div className="col-lg-6 order-1 order-lg-2 text-center">
+              <img
+                src={scholarship.photo ? scholarship.photo : "/assets/img/default.jpg"}
+                className="img-fluid rounded"
+                alt={scholarship.name}
+                style={{ maxHeight: "400px", objectFit: "cover", width: "100%" }}
+              />
+            </div>
+          </>
+        )}
       </div>
-    </section>
+    ))}
+  </div>
+</section>
+
         </section>
 
         {/* Services Section */}
