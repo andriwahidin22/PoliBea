@@ -107,11 +107,8 @@ const AdminPage = () => {
 
   return (
     <>
-<Head>
+      <Head>
         <title>Admin - Beasiswa</title>
-        <link rel="stylesheet" href="../../assets/plugins/chartist/dist/chartist.min.css" />
-        <link rel="stylesheet" href="../../assets/css/style.min.css" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon.png" />
       </Head>
 
       <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
@@ -130,7 +127,7 @@ const AdminPage = () => {
               </a>
             </div>
             <div className="navbar-collapse collapse" id="navbarSupportedContent" data-navbarbg="skin5">
-              <ul className="navbar-nav me-auto mt-md-0 ">
+              <ul className="navbar-nav me-auto mt-md -0 ">
                 <li className="nav-item hidden-sm-down">
                   <form className="app-search ps-3">
                     <input type="text" className="form-control" placeholder="Search for..." />
@@ -304,7 +301,8 @@ const AdminPage = () => {
                       <tr key={scholarship.id}>
                         <td>{index + 1}</td>
                         <td>
-                          <Image src={scholarship.photo} width={80} height={50} alt="Foto Beasiswa" unoptimized />
+                        <Image src={scholarship.photo} width={80} height={50} alt="Foto Beasiswa" unoptimized />
+
                         </td>
                         <td>{scholarship.name}</td>
                         <td>{formatDate(scholarship.timeline)}</td>

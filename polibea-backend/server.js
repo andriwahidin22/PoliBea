@@ -12,6 +12,11 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
+// ✅ Import Routes
+const authRoutes = require('./routes/auth'); 
+
+// ✅ Gunakan Routes
+app.use('/api/auth', authRoutes);
 
 // Database Connection
 const db = mysql.createConnection({

@@ -1,7 +1,7 @@
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-require('dotenv').config(); // Pastikan env ter-load
+require('dotenv').config(); 
 
 // ✅ Login User
 exports.login = async (req, res) => {
@@ -28,10 +28,24 @@ exports.login = async (req, res) => {
     }
 };
 
-// ✅ Verifikasi Token dan Kirim Data User
+// ✅ Middleware untuk verifikasi token
+exports.verifyToken = (req, res, next) => {
+    const token = req.headers['authorization'];
+    
+    if (!token) return res.status(403).json({ message: 'Token diperlukan!' });
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) return res.status(401).json({ message: 'Token tidak valid!' });
+
+        req.userId = decoded.id;
+        next();
+    });
+};
+
+// ✅ Cek Profil User dari Token
 exports.getProfile = async (req, res) => {
     try {
-        const user = await User.findByUsername(req.userId);
+        const user = await User.findById(req.userId); // Gunakan findById, bukan findByUsername
         if (!user) {
             return res.status(404).json({ message: 'User tidak ditemukan' });
         }
