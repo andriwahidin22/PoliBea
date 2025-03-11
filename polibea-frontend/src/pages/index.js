@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Swiper from "swiper";
-import "swiper/swiper-bundle.css"; // Pastikan untuk mengimpor CSS Swiper
+import "swiper/swiper-bundle.css";
 import { useRouter } from "next/router";
 
 export default function Home() {
@@ -84,9 +84,10 @@ export default function Home() {
               src="/assets/img/logo.png"
               alt=""
               style={{ width: "120px", height: "auto" }}
-            /><h1 className="sitename">Polinela Beasiswa</h1>
+            />
+            <h1 className="sitename">Polinela Beasiswa</h1>
           </a>
-          
+
           <nav id="navmenu" className="navmenu">
             <ul>
               <li>
@@ -366,120 +367,161 @@ export default function Home() {
 
           {/* Features Details Section */}
           <section id="features-details" className="features-details section">
-  <div className="container">
-    {scholarships.map((scholarship, index) => (
-      <div 
-        className="row gy-4 justify-content-between features-item align-items-center p-4 shadow-sm rounded bg-light"
-        key={scholarship.id}
-        data-aos="fade-up"
-        data-aos-delay="100"
-      >
-        {/* Jika index genap (0, 2, 4...), gambar di kiri, teks di kanan */}
-        {index % 2 === 0 ? (
-          <>
-            {/* Gambar di kiri */}
-            <div className="col-lg-6 text-center">
-              <img
-                src={scholarship.photo ? scholarship.photo : "/assets/img/default.jpg"}
-                className="img-fluid rounded"
-                alt={scholarship.name}
-                style={{ maxHeight: "400px", objectFit: "cover", width: "100%" }}
-              />
+            <div className="container">
+              {scholarships.map((scholarship, index) => (
+                <div
+                  className="row gy-4 justify-content-between features-item align-items-center p-4 shadow-sm rounded bg-light"
+                  key={scholarship.id}
+                  data-aos="fade-up"
+                  data-aos-delay="100"
+                >
+                  {/* Jika index genap (0, 2, 4...), gambar di kiri, teks di kanan */}
+                  {index % 2 === 0 ? (
+                    <>
+                      {/* Gambar di kiri */}
+                      <div className="col-lg-6 text-center">
+                        <img
+                          src={
+                            scholarship.photo?.startsWith("http")
+                              ? scholarship.photo
+                              : `http://localhost:5001${scholarship.photo}`
+                          }
+                          className="img-fluid rounded"
+                          alt={scholarship.name}
+                          style={{
+                            maxHeight: "400px",
+                            objectFit: "cover",
+                            width: "100%",
+                          }}
+                          onError={(e) =>
+                            (e.target.src = "/assets/img/default.jpg")
+                          } // Fallback jika gambar error
+                        />
+                      </div>
+                      {/* Teks di kanan */}
+                      <div className="col-lg-5">
+                        <div className="content">
+                          <h3 className="fw-bold text-primary">
+                            {scholarship.name}
+                          </h3>
+                          <p>{scholarship.description}</p>
+                          <a
+                            href={`/scholarship/${scholarship.id}`}
+                            className="btn btn-primary btn-lg mt-3"
+                          >
+                            Lihat Detail Persyaratan
+                          </a>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Teks di kiri */}
+                      <div className="col-lg-5 order-2 order-lg-1">
+                        <div className="content">
+                          <h3 className="fw-bold text-primary">
+                            {scholarship.name}
+                          </h3>
+                          <p>{scholarship.description}</p>
+                          {scholarship.requirements?.length > 0 && (
+                            <ul className="list-unstyled">
+                              {scholarship.requirements.map((req, idx) => (
+                                <li key={idx}>
+                                  <i className="bi bi-check-circle text-success"></i>{" "}
+                                  {req}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          <a
+                            href={`/scholarship/${scholarship.id}`}
+                            className="btn btn-primary btn-lg mt-3"
+                          >
+                            Lihat Detail Persyaratan
+                          </a>
+                        </div>
+                      </div>
+                      {/* Gambar di kanan */}
+                      <div className="col-lg-6 order-1 order-lg-2 text-center">
+                        <img
+                          src={
+                            scholarship.photo?.startsWith("http")
+                              ? scholarship.photo
+                              : `http://localhost:5001${scholarship.photo}`
+                          }
+                          className="img-fluid rounded"
+                          alt={scholarship.name}
+                          style={{
+                            maxHeight: "400px",
+                            objectFit: "cover",
+                            width: "100%",
+                          }}
+                          onError={(e) =>
+                            (e.target.src = "/assets/img/default.jpg")
+                          } // Fallback jika gambar error
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
-            {/* Teks di kanan */}
-            <div className="col-lg-5">
-              <div className="content">
-                <h3 className="fw-bold text-primary">{scholarship.name}</h3>
-                <p>{scholarship.description}</p>
-                <a href={`/scholarship/${scholarship.id}`} className="btn btn-primary btn-lg mt-3">
-                  Lihat Detail Persyaratan
-                </a>
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Teks di kiri */}
-            <div className="col-lg-5 order-2 order-lg-1">
-              <div className="content">
-                <h3 className="fw-bold text-primary">{scholarship.name}</h3>
-                <p>{scholarship.description}</p>
-                {scholarship.requirements?.length > 0 && (
-                  <ul className="list-unstyled">
-                    {scholarship.requirements.map((req, idx) => (
-                      <li key={idx}>
-                        <i className="bi bi-check-circle text-success"></i> {req}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <a href={`/scholarship/${scholarship.id}`} className="btn btn-primary btn-lg mt-3">
-                  Lihat Detail Persyaratan
-                </a>
-              </div>
-            </div>
-            {/* Gambar di kanan */}
-            <div className="col-lg-6 order-1 order-lg-2 text-center">
-              <img
-                src={scholarship.photo ? scholarship.photo : "/assets/img/default.jpg"}
-                className="img-fluid rounded"
-                alt={scholarship.name}
-                style={{ maxHeight: "400px", objectFit: "cover", width: "100%" }}
-              />
-            </div>
-          </>
-        )}
-      </div>
-    ))}
-  </div>
-</section>
-
+          </section>
         </section>
 
         {/* Services Section */}
         <section id="services" className="services section light-background">
-      <div className="container">
-        <div className="row g-5">
-          {scholarships.map((scholarship, index) => {
-            let itemClass = "";
-            if (index === 0) itemClass = "item-cyan";
-            else if (index === 1) itemClass = "item-orange";
-            else if (index === 2) itemClass = "item-teal";
-            else if (index === 3) itemClass = "item-red";
-            else if (index === 4) itemClass = "item-indigo";
-            else if (index === 5) itemClass = "item-pink";
-            else itemClass = "item-default"; // Warna default jika lebih dari 6 item
+          <div className="container">
+            <div className="row g-5">
+              {scholarships.map((scholarship, index) => {
+                let itemClass = "";
+                if (index === 0) itemClass = "item-cyan";
+                else if (index === 1) itemClass = "item-orange";
+                else if (index === 2) itemClass = "item-teal";
+                else if (index === 3) itemClass = "item-red";
+                else if (index === 4) itemClass = "item-indigo";
+                else if (index === 5) itemClass = "item-pink";
+                else itemClass = "item-default"; // Warna default jika lebih dari 6 item
 
-            return (
-              <div
-                className="col-lg-6"
-                data-aos="fade-up"
-                data-aos-delay={(index + 1) * 100}
-                key={scholarship.id}
-              >
-                <div className={`service-item ${itemClass} position-relative`}>
-                  <img
-                    src={scholarship.photo}
-                    alt={scholarship.name}
-                    className="icon"
-                  />
-                  <div>
-                    <h3>{scholarship.name}</h3>
-                    <p>{scholarship.description}</p>
-                    <a
-                      href={`/scholarship/${scholarship.id}`}
-                      className="read-more stretched-link"
+                return (
+                  <div
+                    className="col-lg-6"
+                    data-aos="fade-up"
+                    data-aos-delay={(index + 1) * 100}
+                    key={scholarship.id}
+                  >
+                    <div
+                      className={`service-item ${itemClass} position-relative`}
                     >
-                      Learn More <i className="bi bi-arrow-right"></i>
-                    </a>
+                      <img
+                        src={
+                          scholarship.photo?.startsWith("http")
+                            ? scholarship.photo
+                            : `http://localhost:5001${scholarship.photo}`
+                        }
+                        alt={scholarship.name}
+                        className="icon"
+                        onError={(e) =>
+                          (e.target.src = "/assets/img/default.jpg")
+                        } // Fallback jika gambar error
+                      />
+                      <div>
+                        <h3>{scholarship.name}</h3>
+                        <p>{scholarship.description}</p>
+                        <a
+                          href={`/scholarship/${scholarship.id}`}
+                          className="read-more stretched-link"
+                        >
+                          Learn More <i className="bi bi-arrow-right"></i>
+                        </a>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
+                );
+              })}
+            </div>
+          </div>
+        </section>
 
         {/* Contact Section */}
         <section id="contact" className="contact section">
@@ -496,8 +538,10 @@ export default function Home() {
                 >
                   <i className="bi bi-geo-alt"></i>
                   <h3>Address</h3>
-                  <p>Jl. Soekarno Hatta No.10, Rajabasa Raya, Kec. Rajabasa, Kota
-                  Bandar Lampung, Lampung 35144</p>
+                  <p>
+                    Jl. Soekarno Hatta No.10, Rajabasa Raya, Kec. Rajabasa, Kota
+                    Bandar Lampung, Lampung 35144
+                  </p>
                 </div>
               </div>
               <div className="col-lg-3 col-md-6">

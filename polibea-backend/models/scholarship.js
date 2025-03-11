@@ -5,10 +5,9 @@ const Scholarship = {
         const sql = 'SELECT id, name, photo, timeline, description, status FROM scholarships';
         const [rows] = await db.promise().query(sql);
 
-        // Pastikan path photo berupa string, bukan Buffer
         return rows.map(row => ({
             ...row,
-            photo: row.photo ? row.photo.toString() : null
+            photo: row.photo ? row.photo.toString() : null // Pastikan photo berupa string
         }));
     },
 

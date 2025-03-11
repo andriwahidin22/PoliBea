@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -19,25 +20,26 @@ app.use(express.urlencoded({ extended: true }));
 // 🔹 Static Folder untuk Gambar
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// 🔹 Gunakan Routes
-app.use('/api/scholarships', scholarshipRoutes);
-app.use('/api/auth', authRoutes);
+app.get("/api/scholarships", (req, res) => {
+    const sql = "SELECT id, name, CONCAT('http://localhost:5001', photo) AS photo, timeline, description, status FROM scholarships";
+    db.query(sql, (err, results) => {
+      if (err) return res.status(500).json({ error: err.message });
+  
+      console.log("Data dari DB:", results); // ✅ Cek di terminal backend
+      res.json(results);
+    });
+  });
+  
 
-// ✅ Database Connection
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'beasiswa_db'
-});
-
-// 🔹 Cek koneksi database
-db.connect((err) => {
-    if (err) {
-        console.error("Database connection failed: " + err.message);
-    } else {
-        console.log("Database connected!");
-    }
+// ✅ Gunakan Pool MySQL agar lebih stabil
+const db = mysql.createPool({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME || 'beasiswa_db',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
 // 🔹 Konfigurasi Multer untuk Upload Gambar
@@ -51,10 +53,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ✅ Ambil Semua Beasiswa
+// ✅ Ambil Semua Beasiswa (Foto pakai URL lengkap)
 app.get('/api/scholarships', (req, res) => {
-    const sql = "SELECT id, name, CONCAT('http://localhost:5001/uploads/', photo) AS photo, timeline, description, status FROM scholarships";
-    db.query(sql, (err, results) => {
+    const sql = "SELECT id, name, CONCAT(?, photo) AS photo, timeline, description, status FROM scholarships";
+    db.query(sql, [`http://localhost:${PORT}/uploads/`], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });

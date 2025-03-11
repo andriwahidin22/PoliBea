@@ -18,6 +18,9 @@ const AdminPage = () => {
   const [editingId, setEditingId] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
 
+  // ✅ Ambil URL dari .env agar tidak hardcode
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -30,12 +33,31 @@ const AdminPage = () => {
   const fetchScholarships = async () => {
     try {
       const response = await fetch("http://localhost:5001/api/scholarships");
+  
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+  
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server did not return JSON");
+      }
+  
       const data = await response.json();
       setScholarships(data);
     } catch (error) {
       console.error("Error fetching scholarships:", error);
     }
   };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Tanggal tidak tersedia"; // Handle null atau undefined
+  
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString("id-ID", options);
+  };
+  
+  
 
   const handleChange = (e) => {
     if (e.target.name === "photo") {
@@ -58,9 +80,10 @@ const AdminPage = () => {
       formData.append("photo", photoFile);
     }
 
+    // ✅ Gunakan URL dari ENV agar tidak bergantung pada localhost
     const url = editingId
-      ? `http://localhost:5001/api/scholarships/${editingId}`
-      : "http://localhost:5001/api/scholarships";
+      ? `${API_URL}/api/scholarships/${editingId}`
+      : `${API_URL}/api/scholarships`;
     const method = editingId ? "PUT" : "POST";
 
     try {
@@ -82,35 +105,6 @@ const AdminPage = () => {
     } catch (error) {
       console.error("Error saving data:", error);
     }
-  };
-
-  const handleDelete = async (id) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus beasiswa ini?")) return;
-
-    try {
-      await fetch(`http://localhost:5001/api/scholarships/${id}`, {
-        method: "DELETE",
-      });
-      fetchScholarships();
-    } catch (error) {
-      console.error("Error deleting:", error);
-    }
-  };
-
-  const handleEdit = (scholarship) => {
-    setForm({
-      name: scholarship.name,
-      photo: scholarship.photo,
-      timeline: scholarship.timeline,
-      description: scholarship.description,
-      status: scholarship.status,
-    });
-    setEditingId(scholarship.id);
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return format(date, "dd MMMM yyyy");
   };
 
   return (
@@ -399,26 +393,21 @@ const AdminPage = () => {
                   {scholarships.length > 0 ? (
                     scholarships.map((scholarship, index) => (
                       <tr key={scholarship.id}>
-                        <td>{index + 1}</td>
                         <td>
-                          {scholarship.photo ? (
-                            <img
-                              src={scholarship.photo} // Path sudah termasuk 'http://localhost:5001/uploads/'
-                              alt="Scholarship"
-                              width={80}
-                              height={50}
-                              style={{
-                                objectFit: "cover",
-                                borderRadius: "5px",
-                              }}
-                            />
-                          ) : (
-                            <span className="text-muted">No Image</span> // Fallback jika tidak ada gambar
-                          )}
-                        </td>
+  <img
+    src={scholarship.photo.startsWith("http") ? scholarship.photo : `http://localhost:5001${scholarship.photo}`}
+    alt="Scholarship"
+    width={80}
+    height={50}
+    style={{ objectFit: "cover", borderRadius: "5px" }}
+    onError={(e) => e.target.src = "/default-image.jpg"} // Jika gagal, pakai gambar default
+  />
+</td>
+
 
                         <td>{scholarship.name}</td>
-                        <td>{formatDate(scholarship.timeline)}</td>
+                        <td>{scholarship.timeline ? formatDate(scholarship.timeline) : "Tidak ada tanggal"}</td>
+
                         <td>{scholarship.description}</td>
                         <td>
                           <span
