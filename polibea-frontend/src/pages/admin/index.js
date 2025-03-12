@@ -1,11 +1,19 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
 import Head from "next/head";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { useRouter } from "next/router";
 import { format } from "date-fns";
 import Image from "next/image";
 
 const AdminPage = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
   const router = useRouter();
   const [scholarships, setScholarships] = useState([]);
   const [form, setForm] = useState({
@@ -17,9 +25,6 @@ const AdminPage = () => {
   });
   const [editingId, setEditingId] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
-
-  // ✅ Ambil URL dari .env agar tidak hardcode
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -33,31 +38,12 @@ const AdminPage = () => {
   const fetchScholarships = async () => {
     try {
       const response = await fetch("http://localhost:5001/api/scholarships");
-  
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-  
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Server did not return JSON");
-      }
-  
       const data = await response.json();
       setScholarships(data);
     } catch (error) {
       console.error("Error fetching scholarships:", error);
     }
   };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "Tanggal tidak tersedia"; // Handle null atau undefined
-  
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString("id-ID", options);
-  };
-  
-  
 
   const handleChange = (e) => {
     if (e.target.name === "photo") {
@@ -80,10 +66,9 @@ const AdminPage = () => {
       formData.append("photo", photoFile);
     }
 
-    // ✅ Gunakan URL dari ENV agar tidak bergantung pada localhost
     const url = editingId
-      ? `${API_URL}/api/scholarships/${editingId}`
-      : `${API_URL}/api/scholarships`;
+      ? `http://localhost:5001/api/scholarships/${editingId}`
+      : "http://localhost:5001/api/scholarships";
     const method = editingId ? "PUT" : "POST";
 
     try {
@@ -107,12 +92,60 @@ const AdminPage = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus beasiswa ini?")) return;
+
+    try {
+      await fetch(`http://localhost:5001/api/scholarships/${id}`, {
+        method: "DELETE",
+      });
+      fetchScholarships();
+    } catch (error) {
+      console.error("Error deleting:", error);
+    }
+  };
+
+  const handleEdit = (scholarship) => {
+    setForm({
+      name: scholarship.name,
+      photo: scholarship.photo,
+      timeline: scholarship.timeline,
+      description: scholarship.description,
+      status: scholarship.status,
+    });
+    setEditingId(scholarship.id);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return format(date, "dd MMMM yyyy");
+  };
+
   return (
     <>
       <Head>
-        <title>Admin - Beasiswa</title>
+        <meta charSet="utf-8" />
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="keywords" content="admin dashboard, bootstrap 5" />
+        <meta
+          name="description"
+          content="Monster Lite is a powerful admin dashboard template."
+        />
+        <meta name="robots" content="noindex,nofollow" />
+        <title>Dashboard PoliBae</title>
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/assets/images/favicon.png"
+        />
+        <link
+          href="/assets/plugins/chartist/dist/chartist.min.css"
+          rel="stylesheet"
+        />
+        <link href="/assets/css/style.min.css" rel="stylesheet" />
       </Head>
-
       <div
         id="main-wrapper"
         data-layout="vertical"
@@ -128,18 +161,18 @@ const AdminPage = () => {
               <a className="navbar-brand" href="index.html">
                 <b className="logo-icon">
                   <img
-                    src="/assets/images/logo-icon.png"
+                    style={{ width: "120px", height: "auto" }}
+                    src="/assets/img/logo.png"
                     alt="homepage"
                     className="dark-logo"
                   />
                 </b>
-                <span className="logo-text">
-                  <img
-                    src="/assets/images/logo-text.png"
-                    alt="homepage"
-                    className="dark-logo"
-                  />
-                </span>
+              </a>
+              <a
+                className="nav-toggler waves-effect waves-light text-dark d-block d-md-none"
+                href="javascript:void(0)"
+              >
+                <i className="ti-menu ti-close" />
               </a>
             </div>
             <div
@@ -147,7 +180,7 @@ const AdminPage = () => {
               id="navbarSupportedContent"
               data-navbarbg="skin5"
             >
-              <ul className="navbar-nav me-auto mt-md -0 ">
+              <ul className="navbar-nav me-auto mt-md-0 ">
                 <li className="nav-item hidden-sm-down">
                   <form className="app-search ps-3">
                     <input
@@ -156,7 +189,7 @@ const AdminPage = () => {
                       placeholder="Search for..."
                     />
                     <a className="srh-btn">
-                      <i className="ti-search"></i>
+                      <i className="ti-search" />
                     </a>
                   </form>
                 </li>
@@ -181,7 +214,7 @@ const AdminPage = () => {
                   <ul
                     className="dropdown-menu show"
                     aria-labelledby="navbarDropdown"
-                  ></ul>
+                  />
                 </li>
               </ul>
             </div>
@@ -195,100 +228,43 @@ const AdminPage = () => {
                 <li className="sidebar-item">
                   <a
                     className="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="index.html"
+                    href="/admin/dashboard"
                     aria-expanded="false"
                   >
-                    <i
-                      className="me-3 far fa-clock fa-fw"
-                      aria-hidden="true"
-                    ></i>
+                    <i className="me-3 far fa-clock fa-fw" aria-hidden="true" />
                     <span className="hide-menu">Dashboard</span>
                   </a>
                 </li>
                 <li className="sidebar-item">
                   <a
                     className="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="pages-profile.html"
+                    href="/admin"
                     aria-expanded="false"
                   >
-                    <i className="me-3 fa fa-user" aria-hidden="true"></i>
-                    <span className="hide-menu">Profile</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    className="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="table-basic.html"
-                    aria-expanded="false"
-                  >
-                    <i className="me-3 fa fa-table" aria-hidden="true"></i>
-                    <span className="hide-menu">Table</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    className="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="icon-fontawesome.html"
-                    aria-expanded="false"
-                  >
-                    <i className="me-3 fa fa-font" aria-hidden="true"></i>
-                    <span className="hide-menu">Icon</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    className="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="map-google.html"
-                    aria-expanded="false"
-                  >
-                    <i className="me-3 fa fa-globe" aria-hidden="true"></i>
-                    <span className="hide-menu">Google Map</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    className="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="blank.html"
-                    aria-expanded="false"
-                  >
-                    <i className="me-3 fa fa-columns" aria-hidden="true"></i>
-                    <span className="hide-menu">Blank</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    className="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="404.html"
-                    aria-expanded="false"
-                  >
-                    <i
-                      className="me-3 fa fa-info-circle"
-                      aria-hidden="true"
-                    ></i>
-                    <span className="hide-menu">Error 404</span>
+                    <i className="me-3 fa fa-user" aria-hidden="true" />
+                    <span className="hide-menu">Data Beasiswa</span>
                   </a>
                 </li>
               </ul>
             </nav>
           </div>
         </aside>
-
         <div className="page-wrapper">
           <div className="page-breadcrumb">
             <div className="row align-items-center">
               <div className="col-md-6 col-8 align-self-center">
-                <h3 className="page-title mb-0 p-0">Dashboard</h3>
+                <h3 className="page-title mb-0 p-0">Data Beasiswa</h3>
                 <div className="d-flex align-items-center">
                   <nav aria-label="breadcrumb">
                     <ol className="breadcrumb">
                       <li className="breadcrumb-item">
-                        <a href="#">Home</a>
+                        <a href="/admin/dashboard">Home</a>
                       </li>
                       <li
                         className="breadcrumb-item active"
                         aria-current="page"
                       >
-                        Dashboard
+                        Data Beasiswa
                       </li>
                     </ol>
                   </nav>
@@ -296,165 +272,112 @@ const AdminPage = () => {
               </div>
             </div>
           </div>
-
-          <div className="container-fluid">
-            <h1 className="text-center mb-4">Admin Beasiswa</h1>
-
-            <div className="card shadow p-4 mb-4">
-              <h4>{editingId ? "Edit Beasiswa" : "Tambah Beasiswa"}</h4>
-              <form onSubmit={handleSubmit} encType="multipart/form-data">
-                <div className="mb-3">
-                  <label className="form-label">Nama Beasiswa</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Upload Foto</label>
-                  <input
-                    type="file"
-                    className="form-control"
-                    name="photo"
-                    onChange={handleChange}
-                    accept="image/*"
-                  />
-                </div>
-                {form.photo && (
-                  <div className="mb-3">
-                    <Image
-                      src={form.photo}
-                      width={80}
-                      height={50}
-                      alt="Preview"
-                      unoptimized
-                    />
-                  </div>
-                )}
-                <div className="mb-3">
-                  <label className="form-label">Timeline (Deadline)</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="timeline"
-                    value={form.timeline}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Deskripsi</label>
-                  <textarea
-                    className="form-control"
-                    name="description"
-                    value={form.description}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Status</label>
-                  <select
-                    className="form-select"
-                    name="status"
-                    value={form.status}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="dibuka">Dibuka</option>
-                    <option value="ditutup">Ditutup</option>
-                  </select>
-                </div>
-                <button type="submit" className="btn btn-success w-100">
-                  {editingId ? "Update" : "Tambah"}
-                </button>
-              </form>
-            </div>
-
-            <div className="card shadow p-4">
-              <h4>Daftar Beasiswa</h4>
-              <table className="table table-bordered table-striped mt-3">
-                <thead className="table-dark">
-                  <tr>
-                    <th>No</th>
-                    <th>Foto</th>
-                    <th>Nama Beasiswa</th>
-                    <th>Timeline</th>
-                    <th>Deskripsi</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {scholarships.length > 0 ? (
-                    scholarships.map((scholarship, index) => (
-                      <tr key={scholarship.id}>
-                        <td>
-  <img
-    src={scholarship.photo.startsWith("http") ? scholarship.photo : `http://localhost:5001${scholarship.photo}`}
-    alt="Scholarship"
-    width={80}
-    height={50}
-    style={{ objectFit: "cover", borderRadius: "5px" }}
-    onError={(e) => e.target.src = "/default-image.jpg"} // Jika gagal, pakai gambar default
-  />
-</td>
-
-
-                        <td>{scholarship.name}</td>
-                        <td>{scholarship.timeline ? formatDate(scholarship.timeline) : "Tidak ada tanggal"}</td>
-
-                        <td>{scholarship.description}</td>
-                        <td>
-                          <span
-                            className={`badge ${
-                              scholarship.status === "dibuka"
-                                ? "bg-success"
-                                : "bg-danger"
-                            }`}
-                          >
-                            {scholarship.status}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-warning btn-sm me-2"
-                            onClick={() => handleEdit(scholarship)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDelete(scholarship.id)}
-                          >
-                            Hapus
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="7" className="text-center">
-                        Belum ada data
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+          <div className="page-breadcrumb">
+            <div className="text-right mb-6">
+              <a
+                href="/admin/add_bea"
+                className="btn"
+                style={{ backgroundColor: "green", color: "white" }}
+              >
+                Tambah Data
+              </a>
             </div>
           </div>
-
-          <footer className="footer text-center">
-            © 2021 Monster Admin by{" "}
-            <a href="https://www.wrappixel.com/">wrappixel.com</a> Distributed
-            By <a href="https://themewagon.com">ThemeWagon</a>
-          </footer>
+          <div className="container-fluid">
+            <div className="row">
+              <div className="col-sm-12">
+                <div className="card">
+                  <div className="card-body">
+                    <h4 className="card-title">Data Beasiswa</h4>
+                    <div className="table-responsive">
+                      <table className="table user-table no-wrap">
+                        <thead>
+                          <tr>
+                            <th className="border-top-0">Nomor</th>
+                            <th className="border-top-0">Nama Beasiswa</th>
+                            <th className="border-top-0">Dokumentasi</th>
+                            <th className="border-top-0">
+                              Timeline Pendaftaran
+                            </th>
+                            <th className="border-top-0">Deskripsi</th>
+                            <th className="border-top-0">Status Pendaftaran</th>
+                            <th className="border-top-0">Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {scholarships.length > 0 ? (
+                            scholarships.map((scholarship, index) => (
+                              <tr key={scholarship.id}>
+                                <td>{index + 1}</td>
+                                <td>
+                                  <img
+                                    src={
+                                      scholarship.photo.startsWith("http")
+                                        ? scholarship.photo
+                                        : `http://localhost:5001${scholarship.photo}`
+                                    }
+                                    alt="Scholarship"
+                                    width={80}
+                                    height={50}
+                                    style={{
+                                      objectFit: "cover",
+                                      borderRadius: "5px",
+                                    }}
+                                    onError={(e) =>
+                                      (e.target.src = "/default-image.jpg")
+                                    } // Jika gagal, pakai gambar default
+                                  />
+                                </td>
+                                <td>{scholarship.name}</td>
+                                <td>{formatDate(scholarship.timeline)}</td>
+                                <td>{scholarship.description}</td>
+                                <td>
+                                  <span
+                                    className={`badge ${
+                                      scholarship.status === "dibuka"
+                                        ? "bg-success"
+                                        : "bg-danger"
+                                    }`}
+                                  >
+                                    {scholarship.status}
+                                  </span>
+                                </td>
+                                <td>
+                                  <button
+                                    className="btn btn-warning btn-sm me-2"
+                                    onClick={() => handleEdit(scholarship)}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() => handleDelete(scholarship.id)}
+                                  >
+                                    Hapus
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="7" className="text-center">
+                                Belum ada data
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      <footer className="footer text-center">
+        © 2025 PKL D3 Manajemen Informatika{" "}
+      </footer>
     </>
   );
 };

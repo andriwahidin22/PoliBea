@@ -53,15 +53,15 @@ const LoginPage = () => {
   return (
     <>
       <Head>
-        <title>Login - Your App</title>
-        <link href="/assets/img/favicon.png" rel="icon" />
+        <title>Login - Polinela Beasiswa</title>
+        <link href="/assets/img/logo.png" rel="icon" />
       </Head>
       <Background className="d-flex align-items-center justify-content-center">
         <div className="card shadow" style={{ width: '4 00px' }}>
           <div className="card-body">
             <div className="text-center mb-4">
-            <h2 className="mt-3">Login</h2>
-              <Logo src="/assets/img/logo.png" alt="Logo" />
+            <h2 className="mt-3">Halaman Login Admin!</h2>
+            <img style={{ width: "120px", height: "auto" }} src="/assets/img/logo.png" alt="homepage" className="dark-logo" />
             </div>
             <form onSubmit={handleLogin}>
               <div className="mb-3">
