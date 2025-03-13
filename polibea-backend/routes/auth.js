@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/authController');
-const authMiddleware = require('../middleware/auth');
+const ScholarshipController = require('../controllers/scholarshipController'); // Pastikan ini benar
 
-// Route Login
-router.post('/login', authController.login);
-
-// Route untuk cek user berdasarkan token (ubah dari /admin )
-router.get('/profile', authMiddleware, authController.getProfile);
+router.get('/scholarships', ScholarshipController.getAllScholarships);
+router.post('/scholarships', ScholarshipController.createScholarship);
+router.put('/scholarships/:id', ScholarshipController.updateScholarship);
+router.delete('/scholarships/:id', ScholarshipController.deleteScholarship);
 
 module.exports = router;

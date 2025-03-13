@@ -23,7 +23,7 @@ const Header = () => {
             <ul className="navbar-nav">
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" href="#">
-                  <img src="/assets/images/users/1.png" alt="user" className="profile-pic me-2" />
+                  <img src="/assets/images/users/image.png" alt="user" className="profile-pic me-2" />
                   Administrator
                 </a>
               </li>

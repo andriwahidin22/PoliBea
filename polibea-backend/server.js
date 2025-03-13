@@ -8,30 +8,7 @@ const mysql = require('mysql2');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// ✅ Import Routes
-const scholarshipRoutes = require('./routes/scholarship');
-const authRoutes = require('./routes/auth');
-
-// 🔹 Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// 🔹 Static Folder untuk Gambar
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-app.get("/api/scholarships", (req, res) => {
-    const sql = "SELECT id, name, CONCAT('http://localhost:5001', photo) AS photo, timeline, description, status FROM scholarships";
-    db.query(sql, (err, results) => {
-      if (err) return res.status(500).json({ error: err.message });
-  
-      console.log("Data dari DB:", results); // ✅ Cek di terminal backend
-      res.json(results);
-    });
-  });
-  
-
-// ✅ Gunakan Pool MySQL agar lebih stabil
+// ✅ Koneksi ke Database
 const db = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
@@ -41,6 +18,14 @@ const db = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0
 });
+
+// 🔹 Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 🔹 Static Folder untuk Gambar
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 🔹 Konfigurasi Multer untuk Upload Gambar
 const storage = multer.diskStorage({
@@ -53,9 +38,16 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+/* ========================== ✅ API ENDPOINTS ========================== */
+
 // ✅ Ambil Semua Beasiswa (Foto pakai URL lengkap)
 app.get('/api/scholarships', (req, res) => {
-    const sql = "SELECT id, name, CONCAT(?, photo) AS photo, timeline, description, status FROM scholarships";
+    const sql = `
+        SELECT id, name, 
+        IF(photo IS NOT NULL, CONCAT(?, photo), NULL) AS photo, 
+        timeline, description, status, link_pendaftaran, syarat_pendaftaran
+        FROM scholarships
+    `;
     db.query(sql, [`http://localhost:${PORT}/uploads/`], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
@@ -64,15 +56,20 @@ app.get('/api/scholarships', (req, res) => {
 
 // ✅ Tambah Beasiswa
 app.post('/api/scholarships', upload.single('photo'), (req, res) => {
-    const { name, timeline, description, status } = req.body;
-    const photo = req.file ? `/uploads/${req.file.filename}` : null; // Simpan path lengkap
+    const { name, timeline, description, status, link_pendaftaran, syarat_pendaftaran } = req.body;
+    const photo = req.file ? req.file.filename : null; // Hanya simpan nama file
 
-    if (!name || !timeline || !description || !status) {
+    console.log("📩 Data Diterima dari Client:", req.body); // Debugging
+
+    if (!name || !timeline || !description || !status || !link_pendaftaran || !syarat_pendaftaran) {
         return res.status(400).json({ error: "Semua field harus diisi!" });
     }
 
-    const sql = "INSERT INTO scholarships (name, photo, timeline, description, status) VALUES (?, ?, ?, ?, ?)";
-    db.query(sql, [name, photo, timeline, description, status], (err, result) => {
+    const sql = `
+        INSERT INTO scholarships (name, photo, timeline, description, status, link_pendaftaran, syarat_pendaftaran) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+    db.query(sql, [name, photo, timeline, description, status, link_pendaftaran, syarat_pendaftaran], (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ message: "Beasiswa berhasil ditambahkan!", id: result.insertId });
     });
@@ -80,11 +77,14 @@ app.post('/api/scholarships', upload.single('photo'), (req, res) => {
 
 // ✅ Update Beasiswa
 app.put('/api/scholarships/:id', upload.single('photo'), (req, res) => {
-    const { name, timeline, description, status } = req.body;
-    const photo = req.file ? `/uploads/${req.file.filename}` : null; // Simpan path lengkap
+    const { name, timeline, description, status, link_pendaftaran, syarat_pendaftaran } = req.body;
+    const photo = req.file ? req.file.filename : null; // Hanya simpan nama file
 
-    let sql = "UPDATE scholarships SET name=?, timeline=?, description=?, status=?";
-    let params = [name, timeline, description, status];
+    let sql = `
+        UPDATE scholarships 
+        SET name=?, timeline=?, description=?, status=?, link_pendaftaran=?, syarat_pendaftaran=?
+    `;
+    let params = [name, timeline, description, status, link_pendaftaran, syarat_pendaftaran];
 
     if (photo) {
         sql += ", photo=?";
@@ -108,7 +108,7 @@ app.delete('/api/scholarships/:id', (req, res) => {
     });
 });
 
-// ✅ Jalankan Server
+/* ========================== 🚀 Jalankan Server ========================== */
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

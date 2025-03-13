@@ -164,7 +164,6 @@ const AdminPage = () => {
                             height={50}
                             className="rounded shadow-sm border border-secondary"
                             style={{ objectFit: "cover" }}
-                            onError={(e) => (e.target.src = "/default-image.jpg")}
                           />
                         </td>
 
