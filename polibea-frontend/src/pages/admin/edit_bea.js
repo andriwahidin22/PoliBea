@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import { format } from "date-fns";
 import Image from "next/image";
@@ -10,7 +9,7 @@ const AdminPage = () => {
   const [scholarships, setScholarships] = useState([]);
   const [form, setForm] = useState({
     name: "",
-    photo: null,
+    photo: "",
     timeline: "",
     description: "",
     syarat_pendaftaran: "",
@@ -19,7 +18,6 @@ const AdminPage = () => {
   });
   const [editingId, setEditingId] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
-  const [showPopup, setShowPopup] = useState(false); // ⬅️ Tambahkan state untuk popup
   const router = useRouter();
 
   useEffect(() => {
@@ -40,17 +38,15 @@ const AdminPage = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-
     if (name === "photo") {
       setPhotoFile(files[0]);
     } else {
-      setForm((prevForm) => ({ ...prevForm, [name]: value }));
+      setForm((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const formData = new FormData();
     formData.append("name", form.name);
     formData.append("timeline", form.timeline);
@@ -69,11 +65,13 @@ const AdminPage = () => {
     const method = editingId ? "PUT" : "POST";
 
     try {
-      await fetch(url, { method, body: formData });
-
+      await fetch(url, {
+        method,
+        body: formData,
+      });
       setForm({
         name: "",
-        photo: null,
+        photo: "",
         timeline: "",
         description: "",
         syarat_pendaftaran: "",
@@ -83,39 +81,21 @@ const AdminPage = () => {
       setEditingId(null);
       setPhotoFile(null);
       fetchScholarships();
-
-      // ✅ Tampilkan popup setelah sukses menyimpan data
-      setShowPopup(true);
-
-      // ✅ Popup otomatis hilang dalam 3 detik
-      setTimeout(() => setShowPopup(false), 3000);
+      router.push("/admin");
     } catch (error) {
       console.error("Error saving data:", error);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus beasiswa ini?")) return;
-
-    try {
-      await fetch(`http://localhost:5001/api/scholarships/${id}`, {
-        method: "DELETE",
-      });
-      fetchScholarships();
-    } catch (error) {
-      console.error("Error deleting:", error);
-    }
-  };
-
   const handleEdit = (scholarship) => {
     setForm({
-      name: scholarship.name || "",
-      photo: scholarship.photo || null,
-      timeline: scholarship.timeline || "",
-      description: scholarship.description || "",
+      name: scholarship.name,
+      photo: scholarship.photo,
+      timeline: scholarship.timeline,
+      description: scholarship.description,
       syarat_pendaftaran: scholarship.syarat_pendaftaran || "",
       link_pendaftaran: scholarship.link_pendaftaran || "",
-      status: scholarship.status || "dibuka",
+      status: scholarship.status,
     });
     setEditingId(scholarship.id);
   };
@@ -126,15 +106,7 @@ const AdminPage = () => {
         <a href="/admin" className="btn btn-secondary mb-2">
           <i className="fas fa-home" /> Kembali
         </a>
-        <h4>{editingId ? "Edit Beasiswa" : "Tambah Data Beasiswa"}</h4>
-        
-        {/* ✅ Tampilkan Popup jika showPopup = true */}
-        {showPopup && (
-          <div className="alert alert-success text-center" style={{ position: "fixed", top: "10px", left: "50%", transform: "translateX(-50%)", zIndex: 9999 }}>
-            {editingId ? "Beasiswa berhasil diperbarui!" : "Beasiswa berhasil ditambahkan!"}
-          </div>
-        )}
-
+        <h4>{editingId ? "Edit Beasiswa" : "Edit Beasiswa"}</h4>
         <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="mb-3">
             <label className="form-label">Nama Beasiswa</label>
@@ -147,6 +119,7 @@ const AdminPage = () => {
               required
             />
           </div>
+
           <div className="mb-3">
             <label className="form-label">Upload Foto</label>
             <input
@@ -157,10 +130,11 @@ const AdminPage = () => {
               accept="image/*"
             />
           </div>
-          {photoFile && (
+
+          {(photoFile || form.photo) && (
             <div className="mb-3">
               <Image
-                src={URL.createObjectURL(photoFile)}
+                src={photoFile ? URL.createObjectURL(photoFile) : `http://localhost:5001${form.photo}`}
                 width={80}
                 height={50}
                 alt="Preview"
@@ -168,6 +142,7 @@ const AdminPage = () => {
               />
             </div>
           )}
+
           <div className="mb-3">
             <label className="form-label">Timeline (Deadline)</label>
             <input
@@ -179,6 +154,7 @@ const AdminPage = () => {
               required
             />
           </div>
+
           <div className="mb-3">
             <label className="form-label">Deskripsi</label>
             <textarea
@@ -189,6 +165,7 @@ const AdminPage = () => {
               required
             />
           </div>
+
           <div className="mb-3">
             <label className="form-label">Syarat Pendaftaran</label>
             <textarea
@@ -199,9 +176,11 @@ const AdminPage = () => {
               required
             />
           </div>
+
           <div className="mb-3">
             <label className="form-label">Link Pendaftaran</label>
-            <textarea
+            <input
+              type="text"
               className="form-control"
               name="link_pendaftaran"
               value={form.link_pendaftaran}
@@ -209,6 +188,7 @@ const AdminPage = () => {
               required
             />
           </div>
+
           <div className="mb-3">
             <label className="form-label">Status</label>
             <select
@@ -222,17 +202,8 @@ const AdminPage = () => {
               <option value="ditutup">Ditutup</option>
             </select>
           </div>
-          <button
-            type="submit"
-            style={{
-              backgroundColor: "#28a745",
-              color: "#fff",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: 4,
-              cursor: "pointer",
-            }}
-          >
+
+          <button type="submit" className="btn btn-success">
             {editingId ? "Update" : "Simpan"}
           </button>
         </form>

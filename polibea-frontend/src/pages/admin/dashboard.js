@@ -1,10 +1,26 @@
 import { useState, useEffect } from "react";
 import Head from "next/head";
+import Layout from "components/Layout";
 
 const AdminPage = () => {
   const [loading, setLoading] = useState(true);
+  const [scholarships, setScholarships] = useState([]); // State untuk menyimpan data beasiswa
 
   useEffect(() => {
+    const fetchScholarships = async () => {
+      try {
+        const response = await fetch("http://localhost:5001/api/scholarships"); // API untuk mendapatkan data beasiswa
+        const data = await response.json();
+        console.log("Data Beasiswa:", data); // Debugging
+        setScholarships(data);
+      } catch (error) {
+        console.error("Error fetching scholarships:", error);
+      }
+    };
+
+    fetchScholarships();
+
+    // Hapus loading setelah 2 detik
     const timer = setTimeout(() => {
       setLoading(false);
     }, 2000);
@@ -13,189 +29,52 @@ const AdminPage = () => {
   }, []);
 
   return (
-    <>
+    <Layout>
       <Head>
-        <meta charSet="utf-8" />
-        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="keywords" content="admin dashboard, bootstrap 5" />
-        <meta
-          name="description"
-          content="Monster Lite is a powerful admin dashboard template."
-        />
-        <meta name="robots" content="noindex,nofollow" />
-        <title>Dashboard PoliBae</title>
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/assets/images/favicon.png"
-        />
-        <link
-          href="/assets/plugins/chartist/dist/chartist.min.css"
-          rel="stylesheet"
-        />
-        <link href="/assets/css/style.min.css" rel="stylesheet" />
+        <title>Dashboard Admin | Data Beasiswa</title>
       </Head>
-      <div
-        id="main-wrapper"
-        data-layout="vertical"
-        data-navbarbg="skin6"
-        data-sidebartype="full"
-        data-sidebar-position="absolute"
-        data-header-position="absolute"
-        data-boxed-layout="full"
-      >
-        <header className="topbar" data-navbarbg="skin6">
-          <nav className="navbar top-navbar navbar-expand-md navbar-dark">
-            <div className="navbar-header" data-logobg="skin6">
-              <a className="navbar-brand" href="index.html">
-                <b className="logo-icon">
-                  <img
-                    style={{ width: "120px", height: "auto" }}
-                    src="/assets/img/logo.png"
-                    alt="homepage"
-                    className="dark-logo"
-                  />
-                </b>
-              </a>
-              <a
-                className="nav-toggler waves-effect waves-light text-dark d-block d-md-none"
-                href="javascript:void(0)"
-              >
-                <i className="ti-menu ti-close" />
-              </a>
-            </div>
-            <div
-              className="navbar-collapse collapse"
-              id="navbarSupportedContent"
-              data-navbarbg="skin5"
-            >
-              <ul className="navbar-nav me-auto mt-md-0 ">
-                <li className="nav-item hidden-sm-down">
-                  <form className="app-search ps-3">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search for..."
-                    />
-                    <a className="srh-btn">
-                      <i className="ti-search" />
-                    </a>
-                  </form>
-                </li>
-              </ul>
-              <ul className="navbar-nav">
-                <li className="nav-item dropdown">
-                  <a
-                    className="nav-link dropdown-toggle waves-effect waves-dark"
-                    href="#"
-                    id="navbarDropdown"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    <img
-                      src="/assets/images/users/1.jpg"
-                      alt="user"
-                      className="profile-pic me-2"
-                    />
-                    Markarn Doe
-                  </a>
-                  <ul
-                    className="dropdown-menu show"
-                    aria-labelledby="navbarDropdown"
-                  />
-                </li>
-              </ul>
-            </div>
-          </nav>
-        </header>
 
-        <aside className="left-sidebar" data-sidebarbg="skin6">
-          <div className="scroll-sidebar">
-            <nav className="sidebar-nav">
-              <ul id="sidebarnav">
-                <li className="sidebar-item">
-                  <a
-                    className="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="/admin/dashboard"
-                    aria-expanded="false"
-                  >
-                    <i className="me-3 far fa-clock fa-fw" aria-hidden="true" />
-                    <span className="hide-menu">Dashboard</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    className="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="/admin"
-                    aria-expanded="false"
-                  >
-                    <i className="me-3 fa fa-user" aria-hidden="true" />
-                    <span className="hide-menu">Tambah Beasiswa</span>
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </aside>
+      <div className="container-fluid">
+        <div className="row justify-content-center">
+          <h2 className="text-center mb-4">Data Beasiswa</h2>
 
-        <div className="page-wrapper">
-          <div className="page-breadcrumb">
-            <div className="row align-items-center">
-              <div className="col-md-6 col-8 align-self-center">
-                <h3 className="page-title mb-0 p-0">Dashboard</h3>
-                <div className="d-flex align-items-center">
-                  <nav aria-label="breadcrumb">
-                    <ol className="breadcrumb">
-                      <li className="breadcrumb-item">
-                        <a href="/">Home</a>
-                      </li>
-                      <li
-                        className="breadcrumb-item active"
-                        aria-current="page"
-                      >
-                        Dashboard
-                      </li>
-                    </ol>
-                  </nav>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="container-fluid">
-            <div className="row justify-content-center">
-              <div className="col-lg-4 col-md-6">
+          {loading ? (
+            <p className="text-center">Loading data beasiswa...</p>
+          ) : scholarships.length > 0 ? (
+            scholarships.map((scholarship, index) => (
+              <div key={index} className="col-lg-4 col-md-6 mb-4">
                 <div className="card">
+                  {/* Ambil gambar dari database dengan pengecekan URL */}
                   <img
-                    className="card-img-top img-responsive"
-                    src="/assets/images/big/img1.jpg"
-                    alt="Card"
+                    src={
+                      scholarship.photo?.startsWith("http")
+                        ? scholarship.photo
+                        : `http://localhost:5001${scholarship.photo}`
+                    }
+                    alt={scholarship.name}
+                    style={{
+                      width: "100%",
+                      maxHeight: "200px", // Maksimum tinggi 200px, tapi tidak dipaksa
+                      objectFit: "contain", // Gambar akan ditampilkan seluruhnya tanpa terpotong
+                      borderRadius: "5px",
+                    }}
+                    onError={(e) => (e.target.src = "/default-image.jpg")}
                   />
+
                   <div className="card-body">
-                    <ul className="list-inline d-flex align-items-center">
-                      <li className="ps-0">20 May 2021</li>
-                      <li className="ms-auto">
-                        <a href="javascript:void(0)" className="link">
-                          3 Comment
-                        </a>
-                      </li>
-                    </ul>
-                    <h3 className="font-normal">
-                      Featured Hydroflora Pots Garden &amp; Outdoors
-                    </h3>
+                    <h4 className="font-normal">{scholarship.name}</h4>{" "}
+                    {/* Nama Beasiswa */}
+                    <p>{scholarship.description}</p> {/* Deskripsi Beasiswa */}
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-          <footer className="footer text-center">
-            © 2025 PKL D3 Manajemen Informatika{" "}
-          </footer>
+            ))
+          ) : (
+            <p className="text-center">Tidak ada data beasiswa tersedia.</p>
+          )}
         </div>
       </div>
-    </>
+    </Layout>
   );
 };
 

@@ -6,7 +6,7 @@ const authMiddleware = require('../middleware/auth');
 // Route Login
 router.post('/login', authController.login);
 
-// Route untuk cek user berdasarkan token (ubah dari /admin ke /profile)
+// Route untuk cek user berdasarkan token (ubah dari /admin )
 router.get('/profile', authMiddleware, authController.getProfile);
 
 module.exports = router;

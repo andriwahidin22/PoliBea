@@ -570,9 +570,10 @@ export default function Home() {
             <div className="row gy-4 mt-1">
               <div className="col-lg-6" data-aos="fade-up" data-aos-delay="300">
                 <iframe
-                  src="https://maps.app.goo.gl/SfS2earGN6Mc86sc7"
-                  frameBorder="0"
-                  style={{ border: 0, width: "100%", height: "400px" }}
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1986.1923236085681!2d105.23184153382823!3d-5.358136650433947!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e40c54fa0db33eb%3A0xe69b7788ca97353a!2sPoliteknik%20Negeri%20Lampung!5e0!3m2!1sid!2sid!4v1741764767449!5m2!1sid!2sid"
+                  width="100%"
+                  height="400px"
+                  style={{ border: "0" }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
