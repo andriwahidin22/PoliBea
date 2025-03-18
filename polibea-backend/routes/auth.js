@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const ScholarshipController = require('../controllers/scholarshipController'); // Pastikan ini benar
+const authController = require('../controllers/authController');
 
-router.get('/scholarships', ScholarshipController.getAllScholarships);
-router.post('/scholarships', ScholarshipController.createScholarship);
-router.put('/scholarships/:id', ScholarshipController.updateScholarship);
-router.delete('/scholarships/:id', ScholarshipController.deleteScholarship);
+// ✅ Route Login
+router.post('/login', authController.login);
 
 module.exports = router;

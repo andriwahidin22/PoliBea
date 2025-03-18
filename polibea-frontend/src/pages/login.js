@@ -30,25 +30,30 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5001/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+        const response = await fetch('http://localhost:5001/api/login', { // ✅ Perbaiki URL API
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password }),
+        });
 
-      if (!response.ok) {
-        throw new Error('Login failed. Please check your credentials.');
-      }
+        if (!response.ok) {
+            throw new Error('Login failed. Please check your credentials.');
+        }
 
-      const data = await response.json();
-      localStorage.setItem('token', data.token);
-      router.push('/admin'); // Redirect to admin page after successful login
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+
+        if (data.redirect) {
+            router.push(data.redirect); 
+        }
     } catch (error) {
-      alert(error.message);
+        alert(error.message);
     }
-  };
+};
+
+  
 
   return (
     <>

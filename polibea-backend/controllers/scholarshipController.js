@@ -19,14 +19,14 @@ exports.getAllScholarships = async (req, res) => {
 
 exports.createScholarship = async (req, res) => {
     try {
-        const { name, timeline, description, status } = req.body;
+        const { name, start_date, end_date, description, status, syarat_pendaftaran, link_pendaftaran } = req.body;
         const photo = req.file ? `/uploads/${req.file.filename}` : null;
 
-        if (!name || !timeline || !description || !status) {
+        if (!name || !start_date || !end_date || !description || !status) {
             return res.status(400).json({ error: "Semua field harus diisi!" });
         }
 
-        const newScholarship = await Scholarship.create(name, photo, timeline, description, status);
+        const newScholarship = await Scholarship.create(name, photo, start_date, end_date, description, status, syarat_pendaftaran, link_pendaftaran);
 
         // Kembalikan URL lengkap
         const baseUrl = `${req.protocol}://${req.get("host")}`;
@@ -44,9 +44,10 @@ exports.createScholarship = async (req, res) => {
 
 exports.updateScholarship = async (req, res) => {
     try {
-        const { name, timeline, description, status } = req.body;
+        const { name, start_date, end_date, description, status, syarat_pendaftaran, link_pendaftaran } = req.body;
         const photo = req.file ? `/uploads/${req.file.filename}` : null;
-        const updatedScholarship = await Scholarship.update(req.params.id, name, photo, timeline, description, status);
+
+        const updatedScholarship = await Scholarship.update(req.params.id, name, photo, start_date, end_date, description, status, syarat_pendaftaran, link_pendaftaran);
 
         // Kembalikan URL lengkap
         const baseUrl = `${req.protocol}://${req.get("host")}`;

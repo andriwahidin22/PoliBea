@@ -286,7 +286,7 @@ export default function Home() {
                     </span>
                   </li>
                 </ul>
-                <a href="/beasiswa" className="read-more">
+                <a href="#daftarbeasiswa" className="read-more">
                   <span>Lihat Beasiswa</span>
                   <i className="bi bi-arrow-right"></i>
                 </a>
@@ -360,7 +360,7 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="features section">
+        <section id="daftarbeasiswa" className="features section">
           <div className="container section-title" data-aos="fade-up">
             <h2>Daftar Beasiswa</h2>
           </div>
@@ -495,16 +495,21 @@ export default function Home() {
                     >
                       <img
                         src={
-                          scholarship.photo?.startsWith("http")
-                            ? scholarship.photo
-                            : `http://localhost:5001${scholarship.photo}`
+                          scholarship.photo ||
+                          "http://localhost:5001/uploads/default-image.jpg"
                         }
-                        alt={scholarship.name}
-                        className="icon"
-                        onError={(e) =>
-                          (e.target.src = "/assets/img/default.jpg")
-                        } // Fallback jika gambar error
+                        alt="Scholarship"
+                        width={80}
+                        height={50}
+                        className="rounded shadow-sm border border-secondary"
+                        style={{ objectFit: "cover" }}
+                        onError={(e) => {
+                          e.target.onerror = null; // FIX: Hindari loop onError
+                          e.target.src =
+                            "http://localhost:5001/uploads/default-image.jpg";
+                        }}
                       />
+
                       <div>
                         <h3>{scholarship.name}</h3>
                         <p>{scholarship.description}</p>
