@@ -9,6 +9,9 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 5001;
 const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes)
 
 
 // Koneksi ke Database
@@ -26,6 +29,7 @@ const db = mysql.createPool({
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 
 // ✅ Pastikan folder `/uploads` ada
